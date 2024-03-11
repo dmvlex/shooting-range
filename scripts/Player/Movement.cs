@@ -17,19 +17,27 @@ public partial class Movement : CharacterBody3D
 	[Export]
 	public float gravity = 9.8f;
 	[Export]
-	public float lerp_speed = 10.0f;
+	public float lerp_speed = 7.0f;
 
+	private float default_head_y = 1.04f;
     private float currentSpeed = 0f;
-    private float crouching_depth = -0.7f;
+    private float crouching_depth = -0.5f;
 
 
     private Node3D head;
-	Vector3 direction = Vector3.Zero;
+	private CollisionShape3D crch_collision;
+    private CollisionShape3D stand_collision;
+	private RayCast3D player_cast;
+
+    Vector3 direction = Vector3.Zero;
     public override void _Ready()
     {
         base._Ready();
 		head = this.GetNode<Node3D>("Head");
-		Input.MouseMode = Input.MouseModeEnum.Captured;
+		player_cast = this.GetNode<RayCast3D>("player_ray_cast");
+		crch_collision = this.GetNode<CollisionShape3D>("crouching_collision_shape");
+        stand_collision = this.GetNode<CollisionShape3D>("standing_collisin_shape");
+        Input.MouseMode = Input.MouseModeEnum.Captured;
     }
 
    public override void _Input(InputEvent @event)
@@ -62,8 +70,7 @@ public partial class Movement : CharacterBody3D
 	{
 		var fdelta = (float)delta;
 
-		Vector3 velocity = Velocity;
-        head.Position = new Vector3(head.Position.X, 1.95f, head.Position.Z);
+        Vector3 velocity = Velocity;
         // Add the gravity.
         if (!IsOnFloor())
 			velocity.Y -= gravity * fdelta;
@@ -71,15 +78,20 @@ public partial class Movement : CharacterBody3D
 
 		if (Input.IsActionPressed("Crouch"))
 		{
-			var a = 1.95f + crouching_depth;
+			var a = default_head_y + crouching_depth;
 			currentSpeed = CrouchSpeed;
 			head.Position = new Vector3(head.Position.X, Mathf.Lerp(head.Position.Y,a, fdelta*lerp_speed), head.Position.Z);
+			stand_collision.Disabled = true;
+			crch_collision.Disabled = false;
 		}
-		else
+		else if(!player_cast.IsColliding())
 		{
-			if (Input.IsActionPressed("Sprint"))
+            stand_collision.Disabled = false;
+            crch_collision.Disabled = true;
+            head.Position = new Vector3(head.Position.X, Mathf.Lerp(head.Position.Y, default_head_y, fdelta * lerp_speed), head.Position.Z);
+
+            if (Input.IsActionPressed("Sprint"))
 			{
-				head.Position = new Vector3(head.Position.X, 1.95f, head.Position.Z);
 				currentSpeed = SprintSpeed;
 			}
 			else
