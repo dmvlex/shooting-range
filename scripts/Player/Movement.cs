@@ -58,13 +58,7 @@ public partial class Movement : CharacterBody3D
 		}
     }
 
-	private Vector3 Lerp(Vector3 from, Vector3 to, float weight)
-	{
-        float retX = Mathf.Lerp(from.X, to.X, weight);
-        float retY = Mathf.Lerp(from.Y, to.Y, weight);
-        float retZ = Mathf.Lerp(from.Z, to.Z, weight);
-        return new Vector3(retX, retY,retZ);
-    }
+	
 
     public override void _PhysicsProcess(double delta)
 	{
@@ -74,7 +68,6 @@ public partial class Movement : CharacterBody3D
         // Add the gravity.
         if (!IsOnFloor())
 			velocity.Y -= gravity * fdelta;
-
 
 		if (Input.IsActionPressed("Crouch"))
 		{
@@ -111,7 +104,7 @@ public partial class Movement : CharacterBody3D
 		Vector2 inputDir = Input.GetVector("left", "right", "forward", "backward");
         
 
-        direction = Lerp(direction,(Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized(), fdelta * lerp_speed); 
+        direction = direction.Lerp((Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized(), fdelta * lerp_speed); 
 
 		if (direction != Vector3.Zero)
 		{
