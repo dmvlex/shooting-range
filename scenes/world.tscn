@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://ct2rjra8ku02t"]
+[gd_scene load_steps=11 format=3 uid="uid://ct2rjra8ku02t"]
 
 [ext_resource type="Script" path="res://scripts/Player/Movement.cs" id="1_vgk87"]
 [ext_resource type="Script" path="res://scripts/world.cs" id="1_w6vc7"]
@@ -25,6 +25,9 @@ height = 1.5
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jyoks"]
 albedo_color = Color(0.0823529, 0.443137, 0.0705882, 1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n3mos"]
+albedo_color = Color(0.309804, 0.254902, 0.439216, 1)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dpuan"]
 albedo_color = Color(0.501961, 0.129412, 1, 1)
 
@@ -41,6 +44,8 @@ environment = SubResource("Environment_422lb")
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.55545, 0)
 script = ExtResource("1_vgk87")
+bobFrequency = 1.8
+bobAmplitude = 0.05
 
 [node name="player_ray_cast" type="RayCast3D" parent="Player"]
 target_position = Vector3(0, 2, 0)
@@ -56,7 +61,7 @@ disabled = true
 [node name="Head" type="Node3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.03961, 0)
 
-[node name="Camera" type="Camera3D" parent="Player/Head"]
+[node name="HeadCamera" type="Camera3D" parent="Player/Head"]
 current = true
 
 [node name="floor" type="CSGBox3D" parent="."]
@@ -67,18 +72,22 @@ material = SubResource("StandardMaterial3D_jyoks")
 [node name="wall" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 10, 0, 0, 0, 40, 20, 0, 0)
 use_collision = true
+material = SubResource("StandardMaterial3D_n3mos")
 
 [node name="wall2" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 10, 0, 0, 0, 40, -20, 0, 0)
 use_collision = true
+material = SubResource("StandardMaterial3D_n3mos")
 
 [node name="wall3" type="CSGBox3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 40, 0, 10, 0, -1, 0, -1.74846e-06, 0, 0, 20)
 use_collision = true
+material = SubResource("StandardMaterial3D_n3mos")
 
 [node name="wall4" type="CSGBox3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 40, 0, 10, 0, -1, 0, -1.74846e-06, 0, 0, -20)
 use_collision = true
+material = SubResource("StandardMaterial3D_n3mos")
 
 [node name="crate" type="CSGBox3D" parent="."]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -11.6943, 1.41508, -13.2869)
@@ -127,6 +136,12 @@ material = SubResource("StandardMaterial3D_dpuan")
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, -0.360265, 3.12194, 13.0238)
 use_collision = true
 size = Vector3(1.021, 0.295258, 1.48438)
+material = SubResource("StandardMaterial3D_dpuan")
+
+[node name="crate11" type="CSGBox3D" parent="."]
+transform = Transform3D(3, 0, 0, 0, 2.85121, -0.933074, 0, 0.933074, 2.85121, -11.7132, 1.27461, -7.39995)
+use_collision = true
+size = Vector3(0.998245, 0.117821, 3.12415)
 material = SubResource("StandardMaterial3D_dpuan")
 
 [node name="crate4" type="CSGBox3D" parent="."]

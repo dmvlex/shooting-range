@@ -1,4 +1,5 @@
 using Godot;
+using Godot.NativeInterop;
 using System;
 
 public partial class Movement : CharacterBody3D
@@ -23,8 +24,15 @@ public partial class Movement : CharacterBody3D
     private float currentSpeed = 0f;
     private float crouching_depth = -0.5f;
 
+    [Export]
+    private float bobFrequency = 2.0f;
+	[Export]
+	private float bobAmplitude = 0.08f;
+
+	float t_bob = 0.0f;
 
     private Node3D head;
+	private Camera3D headCamera;
 	private CollisionShape3D crch_collision;
     private CollisionShape3D stand_collision;
 	private RayCast3D player_cast;
@@ -34,7 +42,8 @@ public partial class Movement : CharacterBody3D
     {
         base._Ready();
 		head = this.GetNode<Node3D>("Head");
-		player_cast = this.GetNode<RayCast3D>("player_ray_cast");
+		headCamera = head.GetNode<Camera3D>("HeadCamera");
+        player_cast = this.GetNode<RayCast3D>("player_ray_cast");
 		crch_collision = this.GetNode<CollisionShape3D>("crouching_collision_shape");
         stand_collision = this.GetNode<CollisionShape3D>("standing_collisin_shape");
         Input.MouseMode = Input.MouseModeEnum.Captured;
@@ -57,9 +66,6 @@ public partial class Movement : CharacterBody3D
 			head.RotationDegrees = rotDeg;
 		}
     }
-
-	
-
     public override void _PhysicsProcess(double delta)
 	{
 		var fdelta = (float)delta;
@@ -81,7 +87,8 @@ public partial class Movement : CharacterBody3D
 		{
             stand_collision.Disabled = false;
             crch_collision.Disabled = true;
-            head.Position = new Vector3(head.Position.X, Mathf.Lerp(head.Position.Y, default_head_y, fdelta * lerp_speed), head.Position.Z);
+            head.Position = new Vector3(head.Position.X, 
+				Mathf.Lerp(head.Position.Y, default_head_y, fdelta * lerp_speed), head.Position.Z);
 
             if (Input.IsActionPressed("Sprint"))
 			{
@@ -108,8 +115,16 @@ public partial class Movement : CharacterBody3D
 
 		if (direction != Vector3.Zero)
 		{
-			velocity.X = direction.X * currentSpeed;
-			velocity.Z = direction.Z * currentSpeed;
+			if (!IsOnFloor()) 
+			{
+                velocity.X = Mathf.Lerp(velocity.X,direction.X * (currentSpeed/2f), fdelta * 2.0f);
+                velocity.Z = Mathf.Lerp(velocity.Z, direction.Z * (currentSpeed/2f), fdelta * 2.0f);
+            } 
+			else
+			{
+				velocity.X = direction.X * currentSpeed;
+				velocity.Z = direction.Z * currentSpeed;
+			}
 		}
 		else
 		{
@@ -118,6 +133,23 @@ public partial class Movement : CharacterBody3D
 		}
 
 		Velocity = velocity;
-		MoveAndSlide();
+
+
+		var floatIsOnFloor = IsOnFloor() ? 1f : 0f;
+
+        t_bob += fdelta * velocity.Length() * floatIsOnFloor;
+		headCamera.Position = HeadBob(t_bob);
+
+        MoveAndSlide();
+	}
+
+	private Vector3 HeadBob(float time)
+	{
+		var pos = Vector3.Zero;
+
+		pos.Y = MathF.Sin(time * bobFrequency) * bobAmplitude;
+		pos.X = MathF.Cos(bobFrequency / 2) * bobAmplitude;
+		return pos;
+
 	}
 }
